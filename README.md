@@ -36,7 +36,16 @@ Mapa y diálogos:
 
 <img src="docs/mockups/4_mapa.png" width="220"> <img src="docs/mockups/5_dialog_eliminar.png" width="220"> <img src="docs/mockups/6_dialog_foto.png" width="220">
 
-Algunas decisiones de diseño que tomé:
+## Descripción de las pantallas
+
+- Lista: es la pantalla principal. Muestra los avistamientos guardados con el buscador y los filtros arriba. El botón + abre el formulario.
+- Detalle: muestra la foto, los datos y las notas del avistamiento, con un mapa pequeño de la ubicación. Desde aquí se puede editar o eliminar.
+- Formulario: sirve para crear o editar un avistamiento. Se puede agregar la foto y escoger la ubicación actual o marcarla en el mapa.
+- Mapa: muestra todos los avistamientos como pines, cada tipo de animal con su color.
+- Dialog eliminar: pide confirmación antes de borrar un registro.
+- Dialog foto: permite escoger entre tomar la foto con la cámara o elegirla de la galería.
+
+## Algunas decisiones de diseño que tomé:
 - La barra de abajo permite cambiar rápido entre la lista y el mapa.
 - Los filtros están siempre visibles arriba de la lista para no tener que buscarlos en un menú.
 - Cada tipo de animal tiene su color y se usa el mismo en la lista y en los pines del mapa.
