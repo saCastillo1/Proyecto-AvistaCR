@@ -1,0 +1,104 @@
+<resources>
+    <string name="app_name" translatable="false">AvistaCR</string>
+
+    <!-- Navigation and titles -->
+    <string name="nav_list">List</string>
+    <string name="nav_map">Map</string>
+    <string name="title_new_sighting">New sighting</string>
+    <string name="title_edit_sighting">Edit sighting</string>
+    <string name="title_sighting_detail">Sighting detail</string>
+
+    <!-- List and filters -->
+    <string name="search_hint">Search species…</string>
+    <string name="search_map_hint">Search on the map…</string>
+    <string name="filter_all">All</string>
+    <string name="filter_province">Province</string>
+    <string name="filter_date">Date</string>
+    <string name="filter_clear">Clear filters</string>
+    <string name="sort_newest">Newest</string>
+    <string name="sort_oldest">Oldest</string>
+    <string name="sort_name">Name</string>
+    <plurals name="sighting_count">
+        <item quantity="one">%d sighting</item>
+        <item quantity="other">%d sightings</item>
+    </plurals>
+    <string name="empty_list_title">No sightings yet</string>
+    <string name="empty_list_message">Tap the + button to register your first sighting.</string>
+    <string name="empty_filter_message">No sightings match the selected filters.</string>
+
+    <!-- Animal types -->
+    <string name="type_bird">Bird</string>
+    <string name="type_mammal">Mammal</string>
+    <string name="type_reptile">Reptile</string>
+    <string name="type_amphibian">Amphibian</string>
+    <string name="type_other">Other</string>
+
+    <!-- Provinces -->
+    <string name="province_san_jose">San José</string>
+    <string name="province_alajuela">Alajuela</string>
+    <string name="province_cartago">Cartago</string>
+    <string name="province_heredia">Heredia</string>
+    <string name="province_guanacaste">Guanacaste</string>
+    <string name="province_puntarenas">Puntarenas</string>
+    <string name="province_limon">Limón</string>
+
+    <!-- Form -->
+    <string name="label_species">Species *</string>
+    <string name="label_scientific_name">Scientific name</string>
+    <string name="label_type">Type *</string>
+    <string name="label_date">Date *</string>
+    <string name="label_location">Location *</string>
+    <string name="label_notes">Notes</string>
+    <string name="hint_notes">Describe what you observed…</string>
+    <string name="label_required_fields">* Required fields</string>
+    <string name="photo_hint">Camera or gallery</string>
+
+    <!-- Actions -->
+    <string name="action_add_photo">Add photo</string>
+    <string name="action_change_photo">Change photo</string>
+    <string name="action_use_my_location">Use my location</string>
+    <string name="action_pick_on_map">Pick on map</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_view">View</string>
+    <string name="action_view_on_map">View on map</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_photo_title">Add photo</string>
+    <string name="dialog_photo_message">Choose where to get the image from</string>
+    <string name="dialog_photo_camera">Take photo</string>
+    <string name="dialog_photo_camera_desc">Open the camera</string>
+    <string name="dialog_photo_gallery">Choose from gallery</string>
+    <string name="dialog_photo_gallery_desc">Images saved on the phone</string>
+    <string name="dialog_delete_title">Delete sighting?</string>
+    <string name="dialog_delete_message">\"%1$s\" and its photo will be deleted. This action cannot be undone.</string>
+    <string name="dialog_delete_confirm">Delete</string>
+
+    <!-- Messages -->
+    <string name="msg_sighting_saved">Sighting saved</string>
+    <string name="msg_sighting_updated">Sighting updated</string>
+    <string name="msg_sighting_deleted">Sighting deleted</string>
+
+    <!-- Validation errors -->
+    <string name="error_species_required">Species is required</string>
+    <string name="error_species_too_short">Species must have at least 3 characters</string>
+    <string name="error_type_required">Select an animal type</string>
+    <string name="error_date_required">Date is required</string>
+    <string name="error_date_future">Date cannot be in the future</string>
+    <string name="error_location_required">Location is required</string>
+    <string name="error_notes_too_long">Notes cannot exceed 500 characters</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera_rationale">Camera access is needed to take photos of your sightings.</string>
+    <string name="permission_location_rationale">Location access is needed to save where you saw the animal.</string>
+    <string name="permission_denied">Permission denied. You can enable it in the app settings.</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back">Back</string>
+    <string name="cd_sighting_photo">Sighting photo</string>
+    <string name="cd_filters">Filters</string>
+    <string name="cd_my_location">My location</string>
+    <string name="cd_add_sighting">Add sighting</string>
+</resources>
