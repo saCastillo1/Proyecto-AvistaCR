@@ -51,7 +51,7 @@ class SightingFormViewModel(private val repository: ISightingRepository) : ViewM
         _uiState.update { it.copy(dateMillis = millis, errors = it.errors - FormField.DATE) }
     }
 
-    fun onLocationChange(location: Location) {
+    fun onLocationChange(location: Location?) {
         _uiState.update { it.copy(location = location, errors = it.errors - FormField.LOCATION) }
     }
 

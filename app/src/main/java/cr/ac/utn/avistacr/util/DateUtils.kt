@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 object DateUtils {
     private const val DATE_PATTERN = "dd/MM/yyyy"
@@ -30,4 +31,15 @@ object DateUtils {
         }.timeInMillis
 
     fun endOfDay(millis: Long): Long = startOfDay(millis) + DAY_IN_MILLIS - 1
+
+    fun fromUtcSelection(utcMillis: Long): Long {
+        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            timeInMillis = utcMillis
+        }
+        return toMillis(
+            utc.get(Calendar.YEAR),
+            utc.get(Calendar.MONTH) + 1,
+            utc.get(Calendar.DAY_OF_MONTH)
+        )
+    }
 }
