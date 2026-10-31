@@ -1,0 +1,102 @@
+<resources>
+    <!-- Navigation and titles -->
+    <string name="nav_list">Lista</string>
+    <string name="nav_map">Mapa</string>
+    <string name="title_new_sighting">Nuevo avistamiento</string>
+    <string name="title_edit_sighting">Editar avistamiento</string>
+    <string name="title_sighting_detail">Detalle del avistamiento</string>
+
+    <!-- List and filters -->
+    <string name="search_hint">Buscar especie…</string>
+    <string name="search_map_hint">Buscar en el mapa…</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_province">Provincia</string>
+    <string name="filter_date">Fecha</string>
+    <string name="filter_clear">Limpiar filtros</string>
+    <string name="sort_newest">Más recientes</string>
+    <string name="sort_oldest">Más antiguos</string>
+    <string name="sort_name">Nombre</string>
+    <plurals name="sighting_count">
+        <item quantity="one">%d avistamiento</item>
+        <item quantity="other">%d avistamientos</item>
+    </plurals>
+    <string name="empty_list_title">Aún no hay avistamientos</string>
+    <string name="empty_list_message">Toca el botón + para registrar tu primer avistamiento.</string>
+    <string name="empty_filter_message">Ningún avistamiento coincide con los filtros seleccionados.</string>
+
+    <!-- Animal types -->
+    <string name="type_bird">Ave</string>
+    <string name="type_mammal">Mamífero</string>
+    <string name="type_reptile">Reptil</string>
+    <string name="type_amphibian">Anfibio</string>
+    <string name="type_other">Otro</string>
+
+    <!-- Provinces -->
+    <string name="province_san_jose">San José</string>
+    <string name="province_alajuela">Alajuela</string>
+    <string name="province_cartago">Cartago</string>
+    <string name="province_heredia">Heredia</string>
+    <string name="province_guanacaste">Guanacaste</string>
+    <string name="province_puntarenas">Puntarenas</string>
+    <string name="province_limon">Limón</string>
+
+    <!-- Form -->
+    <string name="label_species">Especie *</string>
+    <string name="label_scientific_name">Nombre científico</string>
+    <string name="label_type">Tipo *</string>
+    <string name="label_date">Fecha *</string>
+    <string name="label_location">Ubicación *</string>
+    <string name="label_notes">Notas</string>
+    <string name="hint_notes">Describe lo que observaste…</string>
+    <string name="label_required_fields">* Campos obligatorios</string>
+    <string name="photo_hint">Cámara o galería</string>
+
+    <!-- Actions -->
+    <string name="action_add_photo">Agregar foto</string>
+    <string name="action_change_photo">Cambiar foto</string>
+    <string name="action_use_my_location">Usar mi ubicación</string>
+    <string name="action_pick_on_map">Elegir en mapa</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_edit">Editar</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_view">Ver</string>
+    <string name="action_view_on_map">Ver en el mapa</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_photo_title">Agregar foto</string>
+    <string name="dialog_photo_message">Elige de dónde tomar la imagen</string>
+    <string name="dialog_photo_camera">Tomar foto</string>
+    <string name="dialog_photo_camera_desc">Abrir la cámara</string>
+    <string name="dialog_photo_gallery">Elegir de la galería</string>
+    <string name="dialog_photo_gallery_desc">Imágenes guardadas en el teléfono</string>
+    <string name="dialog_delete_title">¿Eliminar avistamiento?</string>
+    <string name="dialog_delete_message">Se eliminará \"%1$s\" y su foto. Esta acción no se puede deshacer.</string>
+    <string name="dialog_delete_confirm">Eliminar</string>
+
+    <!-- Messages -->
+    <string name="msg_sighting_saved">Avistamiento guardado</string>
+    <string name="msg_sighting_updated">Avistamiento actualizado</string>
+    <string name="msg_sighting_deleted">Avistamiento eliminado</string>
+
+    <!-- Validation errors -->
+    <string name="error_species_required">La especie es obligatoria</string>
+    <string name="error_species_too_short">La especie debe tener al menos 3 caracteres</string>
+    <string name="error_type_required">Selecciona un tipo de animal</string>
+    <string name="error_date_required">La fecha es obligatoria</string>
+    <string name="error_date_future">La fecha no puede ser futura</string>
+    <string name="error_location_required">La ubicación es obligatoria</string>
+    <string name="error_notes_too_long">Las notas no pueden superar los 500 caracteres</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera_rationale">Se necesita acceso a la cámara para tomar fotos de tus avistamientos.</string>
+    <string name="permission_location_rationale">Se necesita acceso a la ubicación para guardar dónde viste al animal.</string>
+    <string name="permission_denied">Permiso denegado. Puedes activarlo en la configuración de la app.</string>
+
+    <!-- Accessibility -->
+    <string name="cd_back">Atrás</string>
+    <string name="cd_sighting_photo">Foto del avistamiento</string>
+    <string name="cd_filters">Filtros</string>
+    <string name="cd_my_location">Mi ubicación</string>
+    <string name="cd_add_sighting">Agregar avistamiento</string>
+</resources>
