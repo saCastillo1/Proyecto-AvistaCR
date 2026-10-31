@@ -14,10 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.card.MaterialCardView
@@ -28,13 +24,12 @@ import cr.ac.utn.avistacr.data.memory.RepositoryProvider
 import cr.ac.utn.avistacr.domain.model.AnimalType
 import cr.ac.utn.avistacr.domain.model.Location
 import cr.ac.utn.avistacr.domain.model.Province
+import cr.ac.utn.avistacr.domain.model.Sighting
 import cr.ac.utn.avistacr.util.DateUtils
 import cr.ac.utn.avistacr.util.FormField
 import cr.ac.utn.avistacr.util.NavigationUtils
 import cr.ac.utn.avistacr.util.labelRes
-import cr.ac.utn.avistacr.viewmodel.SightingFormUiState
 import cr.ac.utn.avistacr.viewmodel.SightingFormViewModel
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class SightingFormActivity : AppCompatActivity() {
@@ -57,8 +52,11 @@ class SightingFormActivity : AppCompatActivity() {
 
     private val animalTypes = AnimalType.entries
     private val provinces = Province.entries
+    private var editingSighting: Sighting? = null
+    private var selectedType: AnimalType? = null
     private var selectedProvince: Province? = null
-    private var isFormFilled = false
+    private var selectedDateMillis: Long = DateUtils.todayMillis()
+    private var photoUri: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,9 +92,14 @@ class SightingFormActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btnSave_Form)
 
         val sightingId = intent.getLongExtra(NavigationUtils.EXTRA_SIGHTING_ID, NavigationUtils.NO_ID)
-        val isEditMode = sightingId != NavigationUtils.NO_ID
+        if (sightingId != NavigationUtils.NO_ID) {
+            editingSighting = viewModel.getSightingById(sightingId)
+        }
 
-        toolbar.setTitle(if (isEditMode) R.string.title_edit_sighting else R.string.title_new_sighting)
+        toolbar.setTitle(
+            if (editingSighting != null) R.string.title_edit_sighting
+            else R.string.title_new_sighting
+        )
         toolbar.setNavigationOnClickListener { finish() }
 
         actvType.setAdapter(
@@ -104,7 +107,8 @@ class SightingFormActivity : AppCompatActivity() {
                 animalTypes.map { getString(it.labelRes()) })
         )
         actvType.setOnItemClickListener { _, _, position, _ ->
-            viewModel.onTypeChange(animalTypes[position])
+            selectedType = animalTypes[position]
+            tilType.error = null
         }
 
         actvProvince.setAdapter(
@@ -113,18 +117,6 @@ class SightingFormActivity : AppCompatActivity() {
         )
         actvProvince.setOnItemClickListener { _, _, position, _ ->
             selectedProvince = provinces[position]
-            updateLocation()
-        }
-
-        txtSpecies.doAfterTextChanged { text ->
-            viewModel.onSpeciesChange(text?.toString() ?: "")
-        }
-        txtScientificName.doAfterTextChanged { text ->
-            viewModel.onScientificNameChange(text?.toString() ?: "")
-        }
-        txtPlace.doAfterTextChanged { updateLocation() }
-        txtNotes.doAfterTextChanged { text ->
-            viewModel.onNotesChange(text?.toString() ?: "")
         }
 
         txtDate.setOnClickListener { showDatePicker() }
@@ -134,86 +126,97 @@ class SightingFormActivity : AppCompatActivity() {
         btnUseLocation.setOnClickListener { showComingSoon() }
         btnPickOnMap.setOnClickListener { showComingSoon() }
         btnCancel.setOnClickListener { finish() }
-        btnSave.setOnClickListener { viewModel.saveSighting() }
+        btnSave.setOnClickListener { saveSighting() }
 
-        if (isEditMode) {
-            viewModel.loadSighting(sightingId)
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state -> showState(state) }
-            }
-        }
+        editingSighting?.let { sighting -> fillForm(sighting) }
+        showDate()
+        showPhoto()
     }
 
-    private fun showState(state: SightingFormUiState) {
-        if (isFinishing) return
-
-        if (state.isSaved) {
-            val message = if (state.isEditMode) R.string.msg_sighting_updated
-            else R.string.msg_sighting_saved
-            Toast.makeText(this, getString(message), Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
-
-        if (state.isEditMode && !isFormFilled) {
-            isFormFilled = true
-            fillForm(state)
-        }
-
-        txtDate.setText(state.dateMillis?.let { DateUtils.formatDate(it) } ?: "")
-        showPhoto(state.photoUri)
-
-        tilSpecies.error = state.errors[FormField.SPECIES]?.let { getString(it) }
-        tilType.error = state.errors[FormField.TYPE]?.let { getString(it) }
-        tilDate.error = state.errors[FormField.DATE]?.let { getString(it) }
-        tilPlace.error = state.errors[FormField.LOCATION]?.let { getString(it) }
-        tilNotes.error = state.errors[FormField.NOTES]?.let { getString(it) }
+    private fun fillForm(sighting: Sighting) {
+        txtSpecies.setText(sighting.species)
+        txtScientificName.setText(sighting.scientificName)
+        selectedType = sighting.type
+        actvType.setText(getString(sighting.type.labelRes()), false)
+        selectedDateMillis = sighting.dateMillis
+        selectedProvince = sighting.location.province
+        actvProvince.setText(getString(sighting.location.province.labelRes()), false)
+        txtPlace.setText(sighting.location.placeName)
+        txtNotes.setText(sighting.notes)
+        photoUri = sighting.photoUri
     }
 
-    private fun fillForm(state: SightingFormUiState) {
-        txtSpecies.setText(state.species)
-        txtScientificName.setText(state.scientificName)
-        state.type?.let { type ->
-            actvType.setText(getString(type.labelRes()), false)
-        }
-        state.location?.let { location ->
-            selectedProvince = location.province
-            actvProvince.setText(getString(location.province.labelRes()), false)
-            txtPlace.setText(location.placeName)
-        }
-        txtNotes.setText(state.notes)
-    }
+    private fun TextInputEditText.value(): String = text?.toString()?.trim() ?: ""
 
-    private fun updateLocation() {
-        val place = txtPlace.text?.toString()?.trim() ?: ""
-        val province = selectedProvince
-        val currentLocation = viewModel.uiState.value.location
+    private fun saveSighting() {
+        try {
+            val species = txtSpecies.value()
+            val scientificName = txtScientificName.value()
+            val place = txtPlace.value()
+            val notes = txtNotes.value()
+            val province = selectedProvince
 
-        if (place.isNotEmpty() && province != null) {
-            viewModel.onLocationChange(
+            val location = if (place.isNotEmpty() && province != null) {
                 Location(
-                    latitude = currentLocation?.latitude ?: 0.0,
-                    longitude = currentLocation?.longitude ?: 0.0,
+                    latitude = editingSighting?.location?.latitude ?: 0.0,
+                    longitude = editingSighting?.location?.longitude ?: 0.0,
                     placeName = place,
                     province = province
                 )
+            } else {
+                null
+            }
+
+            val errors = viewModel.validate(species, selectedType, selectedDateMillis, location, notes)
+            showErrors(errors)
+
+            val type = selectedType
+            if (errors.isNotEmpty() || type == null || location == null) {
+                return
+            }
+
+            val sighting = Sighting(
+                id = editingSighting?.id ?: 0,
+                species = species,
+                scientificName = scientificName,
+                type = type,
+                dateMillis = selectedDateMillis,
+                location = location,
+                notes = notes,
+                photoUri = photoUri
             )
-        } else {
-            viewModel.onLocationChange(null)
+
+            if (editingSighting == null) {
+                viewModel.saveSighting(sighting)
+                Toast.makeText(this, getString(R.string.msg_sighting_saved), Toast.LENGTH_LONG).show()
+            } else {
+                viewModel.updateSighting(sighting)
+                Toast.makeText(this, getString(R.string.msg_sighting_updated), Toast.LENGTH_LONG).show()
+            }
+            finish()
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun showErrors(errors: Map<FormField, Int>) {
+        tilSpecies.error = errors[FormField.SPECIES]?.let { getString(it) }
+        tilType.error = errors[FormField.TYPE]?.let { getString(it) }
+        tilDate.error = errors[FormField.DATE]?.let { getString(it) }
+        tilPlace.error = errors[FormField.LOCATION]?.let { getString(it) }
+        tilNotes.error = errors[FormField.NOTES]?.let { getString(it) }
     }
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        calendar.timeInMillis = viewModel.uiState.value.dateMillis ?: DateUtils.todayMillis()
+        calendar.timeInMillis = selectedDateMillis
 
         val datePickerDialog = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-                viewModel.onDateChange(DateUtils.toMillis(year, month + 1, dayOfMonth))
+                selectedDateMillis = DateUtils.toMillis(year, month + 1, dayOfMonth)
+                tilDate.error = null
+                showDate()
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -223,9 +226,14 @@ class SightingFormActivity : AppCompatActivity() {
         datePickerDialog.show()
     }
 
-    private fun showPhoto(photoUri: String?) {
-        if (photoUri != null) {
-            imgPhoto.setImageURI(Uri.parse(photoUri))
+    private fun showDate() {
+        txtDate.setText(DateUtils.formatDate(selectedDateMillis))
+    }
+
+    private fun showPhoto() {
+        val uri = photoUri
+        if (uri != null) {
+            imgPhoto.setImageURI(Uri.parse(uri))
             imgPhoto.isVisible = true
             layoutAddPhoto.isVisible = false
         } else {

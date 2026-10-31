@@ -10,9 +10,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -29,9 +26,7 @@ import cr.ac.utn.avistacr.domain.model.SortOrder
 import cr.ac.utn.avistacr.util.DateUtils
 import cr.ac.utn.avistacr.util.NavigationUtils
 import cr.ac.utn.avistacr.util.labelRes
-import cr.ac.utn.avistacr.viewmodel.SightingListUiState
 import cr.ac.utn.avistacr.viewmodel.SightingListViewModel
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -78,11 +73,13 @@ class MainActivity : AppCompatActivity() {
         rvSightings.adapter = adapter
 
         txtSearch.doAfterTextChanged { text ->
-            viewModel.onQueryChange(text?.toString() ?: "")
+            viewModel.setQuery(text?.toString() ?: "")
+            refreshList()
         }
 
         chipGroupType.setOnCheckedStateChangeListener { _, checkedIds ->
-            viewModel.onTypeSelected(getTypeFromChip(checkedIds.firstOrNull()))
+            viewModel.setType(getTypeFromChip(checkedIds.firstOrNull()))
+            refreshList()
         }
 
         btnProvince.setOnClickListener { showProvinceDialog() }
@@ -93,6 +90,7 @@ class MainActivity : AppCompatActivity() {
             txtSearch.setText("")
             chipGroupType.check(R.id.chipAll_Main)
             viewModel.clearFilters()
+            refreshList()
         }
 
         fabAdd.setOnClickListener {
@@ -106,45 +104,45 @@ class MainActivity : AppCompatActivity() {
             }
             item.itemId == R.id.nav_list_item
         }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state -> showState(state) }
-            }
-        }
     }
 
-    private fun showState(state: SightingListUiState) {
-        adapter.submitList(state.sightings)
+    override fun onResume() {
+        super.onResume()
+        refreshList()
+    }
 
-        tvCount.text = resources.getQuantityString(
-            R.plurals.sighting_count, state.sightings.size, state.sightings.size
-        )
+    private fun refreshList() {
+        try {
+            val sightings = viewModel.getSightings()
+            val filter = viewModel.filter
 
-        tvEmpty.isVisible = !state.isLoading && state.sightings.isEmpty()
-        tvEmpty.setText(
-            if (state.filter.isActive) R.string.empty_filter_message
-            else R.string.empty_list_message
-        )
+            adapter.submitList(sightings)
+            tvCount.text = resources.getQuantityString(
+                R.plurals.sighting_count, sightings.size, sightings.size
+            )
 
-        btnClearFilters.isVisible = state.filter.isActive
+            tvEmpty.isVisible = sightings.isEmpty()
+            tvEmpty.setText(
+                if (filter.isActive) R.string.empty_filter_message
+                else R.string.empty_list_message
+            )
+            btnClearFilters.isVisible = filter.isActive
 
-        val province = state.filter.province
-        btnProvince.text = if (province != null) getString(province.labelRes())
-        else getString(R.string.filter_province)
+            val province = filter.province
+            btnProvince.text = if (province != null) getString(province.labelRes())
+            else getString(R.string.filter_province)
 
-        val from = state.filter.fromDateMillis
-        val to = state.filter.toDateMillis
-        btnDate.text = if (from != null && to != null) {
-            getString(R.string.date_range_format, DateUtils.formatDate(from), DateUtils.formatDate(to))
-        } else {
-            getString(R.string.filter_date)
-        }
+            val from = filter.fromDateMillis
+            val to = filter.toDateMillis
+            btnDate.text = if (from != null && to != null) {
+                getString(R.string.date_range_format, DateUtils.formatDate(from), DateUtils.formatDate(to))
+            } else {
+                getString(R.string.filter_date)
+            }
 
-        btnSort.setText(state.filter.sortOrder.labelRes())
-
-        state.errorMessage?.let { message ->
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            btnSort.setText(filter.sortOrder.labelRes())
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -161,13 +159,14 @@ class MainActivity : AppCompatActivity() {
         val provinces = Province.entries
         val labels = (listOf(getString(R.string.filter_all)) +
                 provinces.map { getString(it.labelRes()) }).toTypedArray()
-        val current = viewModel.uiState.value.filter.province
+        val current = viewModel.filter.province
         val checkedItem = if (current == null) 0 else provinces.indexOf(current) + 1
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.filter_province)
             .setSingleChoiceItems(labels, checkedItem) { dialog, which ->
-                viewModel.onProvinceSelected(if (which == 0) null else provinces[which - 1])
+                viewModel.setProvince(if (which == 0) null else provinces[which - 1])
+                refreshList()
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.action_cancel, null)
@@ -177,12 +176,13 @@ class MainActivity : AppCompatActivity() {
     private fun showSortDialog() {
         val sortOrders = SortOrder.entries
         val labels = sortOrders.map { getString(it.labelRes()) }.toTypedArray()
-        val checkedItem = sortOrders.indexOf(viewModel.uiState.value.filter.sortOrder)
+        val checkedItem = sortOrders.indexOf(viewModel.filter.sortOrder)
 
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.sort_title)
             .setSingleChoiceItems(labels, checkedItem) { dialog, which ->
-                viewModel.onSortOrderSelected(sortOrders[which])
+                viewModel.setSortOrder(sortOrders[which])
+                refreshList()
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.action_cancel, null)
@@ -198,10 +198,11 @@ class MainActivity : AppCompatActivity() {
             val start = selection.first
             val end = selection.second
             if (start != null && end != null) {
-                viewModel.onDateRangeSelected(
+                viewModel.setDateRange(
                     DateUtils.fromUtcSelection(start),
                     DateUtils.fromUtcSelection(end)
                 )
+                refreshList()
             }
         }
         picker.show(supportFragmentManager, "date_range_picker")

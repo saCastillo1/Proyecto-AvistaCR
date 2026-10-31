@@ -11,9 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import cr.ac.utn.avistacr.data.memory.RepositoryProvider
@@ -21,9 +18,7 @@ import cr.ac.utn.avistacr.util.DateUtils
 import cr.ac.utn.avistacr.util.NavigationUtils
 import cr.ac.utn.avistacr.util.labelRes
 import cr.ac.utn.avistacr.util.showAnimalTypeTag
-import cr.ac.utn.avistacr.viewmodel.SightingDetailUiState
 import cr.ac.utn.avistacr.viewmodel.SightingDetailViewModel
-import kotlinx.coroutines.launch
 
 class SightingDetailActivity : AppCompatActivity() {
 
@@ -79,52 +74,43 @@ class SightingDetailActivity : AppCompatActivity() {
         btnViewOnMap.setOnClickListener {
             NavigationUtils.openActivity(this, MapActivity::class.java)
         }
-
-        if (sightingId == NavigationUtils.NO_ID) {
-            Toast.makeText(this, getString(R.string.error_sighting_not_found), Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
-
-        viewModel.loadSighting(sightingId)
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state -> showState(state) }
-            }
-        }
     }
 
-    private fun showState(state: SightingDetailUiState) {
-        if (isFinishing) return
+    override fun onResume() {
+        super.onResume()
+        loadSighting()
+    }
 
-        val sighting = state.sighting
-        if (sighting == null) {
-            if (!state.isLoading) {
+    private fun loadSighting() {
+        try {
+            val sighting = viewModel.getSightingById(sightingId)
+            if (sighting == null) {
                 Toast.makeText(this, getString(R.string.error_sighting_not_found), Toast.LENGTH_LONG).show()
                 finish()
+                return
             }
-            return
-        }
 
-        currentSpecies = sighting.species
-        tvType.showAnimalTypeTag(sighting.type)
-        tvSpecies.text = sighting.species
-        tvScientificName.text = sighting.scientificName
-        tvScientificName.isVisible = sighting.scientificName.isNotBlank()
-        tvDate.text = DateUtils.formatDate(sighting.dateMillis)
-        tvLocation.text = getString(
-            R.string.place_and_province,
-            sighting.location.placeName,
-            getString(sighting.location.province.labelRes())
-        )
-        tvNotes.text = sighting.notes.ifBlank { "-" }
+            currentSpecies = sighting.species
+            tvType.showAnimalTypeTag(sighting.type)
+            tvSpecies.text = sighting.species
+            tvScientificName.text = sighting.scientificName
+            tvScientificName.isVisible = sighting.scientificName.isNotBlank()
+            tvDate.text = DateUtils.formatDate(sighting.dateMillis)
+            tvLocation.text = getString(
+                R.string.place_and_province,
+                sighting.location.placeName,
+                getString(sighting.location.province.labelRes())
+            )
+            tvNotes.text = sighting.notes.ifBlank { "-" }
 
-        val photoUri = sighting.photoUri
-        if (photoUri != null) {
-            imgPhoto.setImageURI(Uri.parse(photoUri))
-        } else {
-            imgPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
+            val photoUri = sighting.photoUri
+            if (photoUri != null) {
+                imgPhoto.setImageURI(Uri.parse(photoUri))
+            } else {
+                imgPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -134,11 +120,17 @@ class SightingDetailActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_delete_title)
             .setMessage(getString(R.string.dialog_delete_message, currentSpecies))
             .setNegativeButton(R.string.action_cancel, null)
-            .setPositiveButton(R.string.dialog_delete_confirm) { _, _ ->
-                Toast.makeText(this, getString(R.string.msg_sighting_deleted), Toast.LENGTH_LONG).show()
-                finish()
-                viewModel.deleteSighting()
-            }
+            .setPositiveButton(R.string.dialog_delete_confirm) { _, _ -> deleteSighting() }
             .show()
+    }
+
+    private fun deleteSighting() {
+        try {
+            viewModel.deleteSighting(sightingId)
+            Toast.makeText(this, getString(R.string.msg_sighting_deleted), Toast.LENGTH_LONG).show()
+            finish()
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
+        }
     }
 }
