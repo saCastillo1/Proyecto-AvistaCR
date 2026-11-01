@@ -99,4 +99,17 @@
     <string name="cd_filters">Filtros</string>
     <string name="cd_my_location">Mi ubicación</string>
     <string name="cd_add_sighting">Agregar avistamiento</string>
+
+
+    <!-- Task 4: layouts and activities -->
+    <string name="sort_title">Ordenar por</string>
+    <string name="label_place">Lugar *</string>
+    <string name="label_province">Provincia *</string>
+    <string name="detail_date">Fecha</string>
+    <string name="detail_location">Ubicación</string>
+    <string name="map_placeholder">El mapa interactivo se agregará en una próxima versión.</string>
+    <string name="feature_coming_soon">Esta función estará disponible pronto.</string>
+    <string name="error_sighting_not_found">No se encontró el avistamiento.</string>
+    <string name="cd_close">Cerrar</string>
+
 </resources>
