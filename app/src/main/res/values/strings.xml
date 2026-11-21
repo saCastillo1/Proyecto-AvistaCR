@@ -115,4 +115,13 @@
     <string name="cd_close">Close</string>
     <string name="date_range_format" translatable="false">%1$s – %2$s</string>
     <string name="place_and_province" translatable="false">%1$s, %2$s</string>
+
+    <!-- Task 5: CRUD -->
+    <string name="label_id">Sighting ID</string>
+    <string name="cd_search">Search</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+    <string name="dialog_question_title">Question</string>
+    <string name="dialog_update_question">Do you want to update this sighting?</string>
+    <string name="dialog_delete_question">Do you want to delete this sighting?</string>
 </resources>

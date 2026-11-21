@@ -112,4 +112,13 @@
     <string name="error_sighting_not_found">No se encontró el avistamiento.</string>
     <string name="cd_close">Cerrar</string>
 
+    <!-- Task 5: CRUD -->
+    <string name="label_id">ID del avistamiento</string>
+    <string name="cd_search">Buscar</string>
+    <string name="action_yes">Sí</string>
+    <string name="action_no">No</string>
+    <string name="dialog_question_title">Pregunta</string>
+    <string name="dialog_update_question">¿Desea actualizar este avistamiento?</string>
+    <string name="dialog_delete_question">¿Desea eliminar este avistamiento?</string>
+
 </resources>

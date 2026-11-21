@@ -3,9 +3,13 @@ package cr.ac.utn.avistacr
 import android.app.DatePickerDialog
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -26,6 +30,7 @@ import cr.ac.utn.avistacr.domain.model.Location
 import cr.ac.utn.avistacr.domain.model.Province
 import cr.ac.utn.avistacr.domain.model.Sighting
 import cr.ac.utn.avistacr.util.DateUtils
+import cr.ac.utn.avistacr.util.DialogUtils
 import cr.ac.utn.avistacr.util.FormField
 import cr.ac.utn.avistacr.util.NavigationUtils
 import cr.ac.utn.avistacr.util.labelRes
@@ -35,6 +40,8 @@ import java.util.Calendar
 class SightingFormActivity : AppCompatActivity() {
 
     private lateinit var viewModel: SightingFormViewModel
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var txtId: TextInputEditText
     private lateinit var imgPhoto: ImageView
     private lateinit var layoutAddPhoto: LinearLayout
     private lateinit var tilSpecies: TextInputLayout
@@ -53,6 +60,7 @@ class SightingFormActivity : AppCompatActivity() {
     private val animalTypes = AnimalType.entries
     private val provinces = Province.entries
     private var editingSighting: Sighting? = null
+    private var isEditMode: Boolean = false
     private var selectedType: AnimalType? = null
     private var selectedProvince: Province? = null
     private var selectedDateMillis: Long = DateUtils.todayMillis()
@@ -70,6 +78,8 @@ class SightingFormActivity : AppCompatActivity() {
 
         viewModel = SightingFormViewModel(RepositoryProvider.sightingRepository)
 
+        toolbar = findViewById(R.id.toolbar_Form)
+        txtId = findViewById(R.id.txtId_Form)
         imgPhoto = findViewById(R.id.imgPhoto_Form)
         layoutAddPhoto = findViewById(R.id.layoutAddPhoto_Form)
         tilSpecies = findViewById(R.id.tilSpecies_Form)
@@ -84,22 +94,14 @@ class SightingFormActivity : AppCompatActivity() {
         actvProvince = findViewById(R.id.actvProvince_Form)
         tilNotes = findViewById(R.id.tilNotes_Form)
         txtNotes = findViewById(R.id.txtNotes_Form)
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar_Form)
+        val btnSearch = findViewById<ImageButton>(R.id.btnSearch_Form)
         val cardPhoto = findViewById<MaterialCardView>(R.id.cardPhoto_Form)
         val btnUseLocation = findViewById<Button>(R.id.btnUseLocation_Form)
         val btnPickOnMap = findViewById<Button>(R.id.btnPickOnMap_Form)
         val btnCancel = findViewById<Button>(R.id.btnCancel_Form)
         val btnSave = findViewById<Button>(R.id.btnSave_Form)
 
-        val sightingId = intent.getLongExtra(NavigationUtils.EXTRA_SIGHTING_ID, NavigationUtils.NO_ID)
-        if (sightingId != NavigationUtils.NO_ID) {
-            editingSighting = viewModel.getSightingById(sightingId)
-        }
-
-        toolbar.setTitle(
-            if (editingSighting != null) R.string.title_edit_sighting
-            else R.string.title_new_sighting
-        )
+        setSupportActionBar(toolbar)
         toolbar.setNavigationOnClickListener { finish() }
 
         actvType.setAdapter(
@@ -126,11 +128,129 @@ class SightingFormActivity : AppCompatActivity() {
         btnUseLocation.setOnClickListener { showComingSoon() }
         btnPickOnMap.setOnClickListener { showComingSoon() }
         btnCancel.setOnClickListener { finish() }
-        btnSave.setOnClickListener { saveSighting() }
+        btnSave.setOnClickListener { confirmSave() }
 
-        editingSighting?.let { sighting -> fillForm(sighting) }
+        btnSearch.setOnClickListener(View.OnClickListener { view ->
+            searchSighting(txtId.value())
+        })
+
         showDate()
         showPhoto()
+        showTitle()
+
+        val sightingId = intent.getLongExtra(NavigationUtils.EXTRA_SIGHTING_ID, NavigationUtils.NO_ID)
+        if (sightingId != NavigationUtils.NO_ID) {
+            txtId.setText(sightingId.toString())
+            searchSighting(sightingId.toString())
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.crud_actions, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val menuDelete = menu!!.findItem(R.id.mnuDelete)
+        menuDelete.isVisible = isEditMode
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.mnuSave -> {
+                confirmSave()
+                return true
+            }
+            R.id.mnuDelete -> {
+                DialogUtils.showDialogCondition(this,
+                    getString(R.string.dialog_delete_question)) {
+                    deleteSighting()
+                }
+                return true
+            }
+            R.id.mnuCancel -> {
+                cleanScreen()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun confirmSave() {
+        if (isEditMode) {
+            DialogUtils.showDialogCondition(this,
+                getString(R.string.dialog_update_question)) {
+                saveSighting()
+            }
+        } else {
+            saveSighting()
+        }
+    }
+
+    private fun searchSighting(id: String) {
+        try {
+            val sighting = viewModel.getSightingById(id.toLongOrNull() ?: NavigationUtils.NO_ID)
+            if (sighting != null) {
+                editingSighting = sighting
+                isEditMode = true
+                txtId.isEnabled = false
+                fillForm(sighting)
+                showErrors(emptyMap())
+                showDate()
+                showPhoto()
+                showTitle()
+                invalidateOptionsMenu()
+            } else {
+                Toast.makeText(this, getString(R.string.error_sighting_not_found),
+                    Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            cleanScreen()
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun deleteSighting() {
+        try {
+            val sighting = editingSighting ?: return
+            viewModel.deleteSighting(sighting.id)
+            Toast.makeText(this, getString(R.string.msg_sighting_deleted), Toast.LENGTH_LONG).show()
+            finish()
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message.toString(), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun cleanScreen() {
+        editingSighting = null
+        isEditMode = false
+        selectedType = null
+        selectedProvince = null
+        selectedDateMillis = DateUtils.todayMillis()
+        photoUri = null
+        txtId.isEnabled = true
+        txtId.setText("")
+        txtSpecies.setText("")
+        txtScientificName.setText("")
+        actvType.setText("", false)
+        actvProvince.setText("", false)
+        txtPlace.setText("")
+        txtNotes.setText("")
+        showErrors(emptyMap())
+        showDate()
+        showPhoto()
+        showTitle()
+        invalidateOptionsMenu()
+    }
+
+    private fun showTitle() {
+        if (isEditMode) {
+            toolbar.setTitle(R.string.title_edit_sighting)
+        } else {
+            toolbar.setTitle(R.string.title_new_sighting)
+        }
     }
 
     private fun fillForm(sighting: Sighting) {
