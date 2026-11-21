@@ -33,4 +33,8 @@ class SightingFormViewModel(
     fun updateSighting(sighting: Sighting) {
         repository.updateSighting(sighting)
     }
+
+    fun deleteSighting(id: Long) {
+        repository.deleteSighting(id)
+    }
 }
