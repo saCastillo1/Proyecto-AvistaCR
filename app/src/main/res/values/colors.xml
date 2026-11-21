@@ -7,4 +7,26 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+
+    <!-- AvistaCR theme -->
+    <color name="avista_primary">#0D6D35</color>
+    <color name="avista_on_primary">#FFFFFF</color>
+    <color name="avista_primary_container">#9EF6AF</color>
+    <color name="avista_on_primary_container">#00210B</color>
+    <color name="avista_secondary_container">#D3E8D2</color>
+    <color name="avista_on_secondary_container">#0E1F12</color>
+
+    <!-- Animal type tags -->
+    <color name="type_bird_container">#D6E3FF</color>
+    <color name="type_bird_on_container">#001B3E</color>
+    <color name="type_mammal_container">#FFDCC2</color>
+    <color name="type_mammal_on_container">#2E1500</color>
+    <color name="type_reptile_container">#D8EBAA</color>
+    <color name="type_reptile_on_container">#141F00</color>
+    <color name="type_amphibian_container">#FFD8EE</color>
+    <color name="type_amphibian_on_container">#3A0A2B</color>
+    <color name="type_other_container">#E2E3DE</color>
+    <color name="type_other_on_container">#191C19</color>
+
 </resources>

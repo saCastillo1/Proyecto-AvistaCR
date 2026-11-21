@@ -1,5 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.AvistaCR" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/avista_primary</item>
+        <item name="colorOnPrimary">@color/avista_on_primary</item>
+        <item name="colorPrimaryContainer">@color/avista_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/avista_on_primary_container</item>
+        <item name="colorSecondaryContainer">@color/avista_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/avista_on_secondary_container</item>
+    </style>
 
-    <style name="Theme.AvistaCR" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.AvistaCR" parent="Base.Theme.AvistaCR" />
 </resources>

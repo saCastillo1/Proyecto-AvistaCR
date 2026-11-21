@@ -101,4 +101,18 @@
     <string name="cd_filters">Filters</string>
     <string name="cd_my_location">My location</string>
     <string name="cd_add_sighting">Add sighting</string>
+
+
+    <!-- Task 4: layouts and activities -->
+    <string name="sort_title">Sort by</string>
+    <string name="label_place">Place *</string>
+    <string name="label_province">Province *</string>
+    <string name="detail_date">Date</string>
+    <string name="detail_location">Location</string>
+    <string name="map_placeholder">The interactive map will be added in a future version.</string>
+    <string name="feature_coming_soon">This feature will be available soon.</string>
+    <string name="error_sighting_not_found">The sighting was not found.</string>
+    <string name="cd_close">Close</string>
+    <string name="date_range_format" translatable="false">%1$s – %2$s</string>
+    <string name="place_and_province" translatable="false">%1$s, %2$s</string>
 </resources>
